@@ -25,29 +25,68 @@ export default function TimerView({
     sessionStartTime,
     onEndSession,
 }: TimerViewProps) {
-    const [timeRemaining, setTimeRemaining] = useState(15 * 60); // 15 minutes in seconds
+    const [timeRemaining, setTimeRemaining] = useState(15 * 60);
     const [totalElapsed, setTotalElapsed] = useState(0);
     const [intervalNumber, setIntervalNumber] = useState(1);
     const [logs, setLogs] = useState<LogEntry[]>([]);
     const [showLogPopup, setShowLogPopup] = useState(false);
     const [popupTimeRemaining, setPopupTimeRemaining] = useState(50);
     const [currentLog, setCurrentLog] = useState('');
-    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const [triggerSound, setTriggerSound] = useState(0);
+    const [volume, setVolume] = useState(0.7);
+    const [isMuted, setIsMuted] = useState(false);
+    const audioRef = useRef<HTMLAudioElement>(null);
 
-    // Initialize audio
+    // Unlock audio on the very first user interaction after mount.
+    // This plays a silent blip so Chrome marks this audio element as "user-activated".
     useEffect(() => {
-        audioRef.current = new Audio('/notification.mp3');
+        const unlock = () => {
+            const el = audioRef.current;
+            if (el) {
+                el.muted = true;
+                el.play().then(() => {
+                    el.pause();
+                    el.muted = false;
+                    el.currentTime = 0;
+                }).catch(() => { });
+            }
+            document.removeEventListener('click', unlock);
+            document.removeEventListener('keydown', unlock);
+        };
+        document.addEventListener('click', unlock);
+        document.addEventListener('keydown', unlock);
+        // Also try immediately (the START SESSION click may still be in the event stack)
+        unlock();
+        return () => {
+            document.removeEventListener('click', unlock);
+            document.removeEventListener('keydown', unlock);
+        };
     }, []);
 
-    // Main timer
+    // Sync volume to audio element
+    useEffect(() => {
+        if (audioRef.current) {
+            audioRef.current.volume = isMuted ? 0 : volume;
+        }
+    }, [volume, isMuted]);
+
+    // Play sound whenever triggerSound increments (state-driven, outside setInterval)
+    useEffect(() => {
+        if (triggerSound > 0 && audioRef.current) {
+            const el = audioRef.current;
+            el.currentTime = 0;
+            el.play().catch((err) => console.error('Audio play failed:', err));
+        }
+    }, [triggerSound]);
+
+    // Main 15-minute countdown
     useEffect(() => {
         if (showLogPopup) return;
 
         const timer = setInterval(() => {
             setTimeRemaining((prev) => {
                 if (prev <= 1) {
-                    // Timer reached 0, play sound and show popup
-                    audioRef.current?.play().catch(console.error);
+                    setTriggerSound((n) => n + 1);
                     setShowLogPopup(true);
                     setPopupTimeRemaining(50);
                     return 15 * 60;
@@ -60,14 +99,13 @@ export default function TimerView({
         return () => clearInterval(timer);
     }, [showLogPopup]);
 
-    // Popup timer
+    // 50-second popup countdown
     useEffect(() => {
         if (!showLogPopup) return;
 
         const timer = setInterval(() => {
             setPopupTimeRemaining((prev) => {
                 if (prev <= 1) {
-                    // Popup timer expired, save log and close
                     saveLog();
                     return 50;
                 }
@@ -105,9 +143,7 @@ export default function TimerView({
         const hours = Math.floor(seconds / 3600);
         const mins = Math.floor((seconds % 3600) / 60);
         const secs = seconds % 60;
-        if (hours > 0) {
-            return `${hours}h ${mins}m ${secs}s`;
-        }
+        if (hours > 0) return `${hours}h ${mins}m ${secs}s`;
         return `${mins}m ${secs}s`;
     };
 
@@ -127,6 +163,9 @@ export default function TimerView({
 
     return (
         <>
+            {/* Hidden audio element rendered in the DOM */}
+            <audio ref={audioRef} src="/notification.mp3" preload="auto" />
+
             <div className="card">
                 <h3>SESSION #{sessionNumber} • {folderName}</h3>
                 <h2>{taskTitle}</h2>
@@ -151,6 +190,32 @@ export default function TimerView({
                 <button className="btn btn-danger" onClick={handleEndSession}>
                     ⬛ END SESSION
                 </button>
+
+                <div className="volume-control">
+                    <span
+                        className="volume-icon"
+                        onClick={() => setIsMuted(!isMuted)}
+                        title={isMuted ? 'Unmute' : 'Mute'}
+                    >
+                        {isMuted || volume === 0 ? '🔇' : volume < 0.5 ? '🔉' : '🔊'}
+                    </span>
+                    <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        value={isMuted ? 0 : volume}
+                        onChange={(e) => {
+                            const val = parseFloat(e.target.value);
+                            setVolume(val);
+                            if (val > 0) setIsMuted(false);
+                        }}
+                        className="volume-slider"
+                    />
+                    <span className="volume-label">
+                        {isMuted ? '0' : Math.round(volume * 100)}%
+                    </span>
+                </div>
             </div>
 
             {showLogPopup && (
@@ -188,3 +253,4 @@ export default function TimerView({
         </>
     );
 }
+

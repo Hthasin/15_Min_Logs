@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { existsSync } from 'fs';
+import { join } from 'path';
 
 const execAsync = promisify(exec);
 
@@ -14,39 +16,50 @@ export async function POST(request: Request) {
 
         const commitMessage = `Work Session #${sessionNumber} - ${taskTitle} - ${date}`;
         const cwd = process.cwd();
+        const folderPath = join(cwd, 'work_sessions', folder);
 
-        // Git add
+        // Check if folder exists
+        if (!existsSync(folderPath)) {
+            return NextResponse.json({ error: `Folder not found: ${folderPath}` }, { status: 400 });
+        }
+
+        // Git add - use -A to add all files including new ones
         try {
-            await execAsync(`git add work_sessions/${folder}/`, { cwd });
-        } catch (error) {
-            console.error('Git add error:', error);
-            return NextResponse.json({ error: 'Failed to stage files' }, { status: 500 });
+            await execAsync(`git add -A "work_sessions/${folder}/"`, { cwd });
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error('Git add error:', errorMessage);
+            return NextResponse.json({ error: `Failed to stage files: ${errorMessage}` }, { status: 500 });
         }
 
         // Git commit
         try {
             await execAsync(`git commit -m "${commitMessage}"`, { cwd });
         } catch (error: unknown) {
-            // Check if it's "nothing to commit"
             const errorMessage = error instanceof Error ? error.message : String(error);
-            if (errorMessage.includes('nothing to commit')) {
+            // Check if it's "nothing to commit"
+            if (errorMessage.includes('nothing to commit') || errorMessage.includes('no changes')) {
                 return NextResponse.json({ success: true, message: 'No changes to commit' });
             }
-            console.error('Git commit error:', error);
-            return NextResponse.json({ error: 'Failed to commit changes' }, { status: 500 });
+            console.error('Git commit error:', errorMessage);
+            return NextResponse.json({ error: `Failed to commit: ${errorMessage}` }, { status: 500 });
         }
 
         // Git push
         try {
-            await execAsync('git push', { cwd });
-        } catch (error) {
-            console.error('Git push error:', error);
-            return NextResponse.json({ error: 'Failed to push to GitHub' }, { status: 500 });
+            const { stdout } = await execAsync('git push', { cwd });
+            console.log('Git push output:', stdout);
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error('Git push error:', errorMessage);
+            return NextResponse.json({ error: `Failed to push: ${errorMessage}` }, { status: 500 });
         }
 
         return NextResponse.json({ success: true, message: 'Successfully pushed to GitHub' });
-    } catch (error) {
-        console.error('Git push error:', error);
-        return NextResponse.json({ error: 'Failed to push to GitHub' }, { status: 500 });
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error('Git push error:', errorMessage);
+        return NextResponse.json({ error: `Failed to push to GitHub: ${errorMessage}` }, { status: 500 });
     }
 }
+

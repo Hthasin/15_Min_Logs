@@ -36,7 +36,7 @@ export default function TimerView({
 
     // Initialize audio
     useEffect(() => {
-        audioRef.current = new Audio('/notification.m4a');
+        audioRef.current = new Audio('/notification.mp3');
     }, []);
 
     // Main timer

@@ -41,23 +41,37 @@ The timer view includes a built-in volume slider to control the notification sou
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Fork & Run
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18+)
+- [Node.js](https://nodejs.org/) (v18 or higher)
 - [Git](https://git-scm.com/)
 
-### Install & Run
+> **Note:** This is a JavaScript/Node.js project. All dependencies are managed through `package.json` — there's no `requirements.txt`. Just run `npm install` and you're good to go.
+
+### Quick Start
 
 ```bash
+# 1. Fork this repo on GitHub, then clone your fork
 git clone https://github.com/YOUR_USERNAME/15_Min_Alex.git
 cd 15_Min_Alex
+
+# 2. Install dependencies
 npm install
+
+# 3. Start the dev server
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Production Build (optional)
+
+```bash
+npm run build
+npm start
+```
 
 ---
 
@@ -110,4 +124,4 @@ This app was inspired by a short I watched by **Alex Hormozi**. The idea is simp
 
 ---
 
-*Built with focus. One 15-minute block at a time.*
+*Built with focus. One block at a time.*

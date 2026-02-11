@@ -54,7 +54,7 @@ The timer view includes a built-in volume slider to control the notification sou
 
 ```bash
 # 1. Fork this repo on GitHub, then clone your fork
-git clone https://github.com/YOUR_USERNAME/15_Min_Alex.git
+git clone https://github.com/YOUR_USERNAME/15_Min_Logs.git
 cd 15_Min_Alex
 
 # 2. Install dependencies

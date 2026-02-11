@@ -23,7 +23,14 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: `Folder not found: ${folderPath}` }, { status: 400 });
         }
 
-        // Git add - use -A to add all files including new ones
+        // Remove stale lock file if it exists
+        const lockFile = join(cwd, '.git', 'index.lock');
+        if (existsSync(lockFile)) {
+            const { unlinkSync } = require('fs');
+            try { unlinkSync(lockFile); } catch { }
+        }
+
+        // Git add
         try {
             await execAsync(`git add -A "work_sessions/${folder}/"`, { cwd });
         } catch (error: unknown) {

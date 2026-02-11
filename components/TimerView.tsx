@@ -192,13 +192,19 @@ export default function TimerView({
                 </button>
 
                 <div className="volume-control">
-                    <span
+                    <img
+                        src="/speaker_icon.png"
+                        alt="Volume"
                         className="volume-icon"
                         onClick={() => setIsMuted(!isMuted)}
                         title={isMuted ? 'Unmute' : 'Mute'}
-                    >
-                        {isMuted || volume === 0 ? '🔇' : volume < 0.5 ? '🔉' : '🔊'}
-                    </span>
+                        style={{
+                            width: '20px',
+                            height: '20px',
+                            opacity: isMuted || volume === 0 ? 0.3 : 1,
+                            filter: isMuted ? 'grayscale(1)' : 'none',
+                        }}
+                    />
                     <input
                         type="range"
                         min="0"

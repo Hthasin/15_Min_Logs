@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-    title: "15 Min Tracker",
+    title: "15 Min Logs",
     description: "Productivity tracker with 15-minute intervals",
 };
 

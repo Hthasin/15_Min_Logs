@@ -1,4 +1,4 @@
-# ⏱️ 15 Min Logs
+# ⏱️ 15-Minute Logs
 
 A retro-styled local productivity tracker that breaks your work into focused 15-minute intervals. Inspired by an [Alex Hormozi short](https://www.youtube.com/@AlexHormozi) about the power of working in small, hyper-focused time blocks — if you can't focus for 15 minutes, you can't focus at all.
 

@@ -1,4 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('/fonts/PressStart2P-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --bg-dark: #0a0a0a;
@@ -448,4 +454,94 @@ textarea {
   color: var(--text-secondary);
   min-width: 30px;
   text-align: right;
+}
+
+/* Notification Banner */
+.notification-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 900;
+  animation: slideDown 0.4s ease-out;
+}
+
+.notification-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, rgba(255, 0, 255, 0.15), rgba(0, 255, 255, 0.15));
+  border-bottom: 3px solid var(--magenta);
+  box-shadow:
+    0 0 20px rgba(255, 0, 255, 0.4),
+    0 4px 20px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  animation: bannerPulse 1.5s ease-in-out infinite;
+}
+
+.notification-banner-icon {
+  font-size: 1.5rem;
+  animation: spin 2s linear infinite;
+}
+
+.notification-banner-content strong {
+  font-family: var(--font-retro);
+  font-size: 0.7rem;
+  color: var(--magenta);
+  text-shadow: 0 0 10px var(--magenta);
+  display: block;
+}
+
+.notification-banner-content p {
+  font-family: var(--font-retro);
+  font-size: 0.5rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+.notification-banner-close {
+  margin-left: auto;
+  background: none;
+  border: 2px solid var(--text-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.7rem;
+  padding: 0.3rem 0.5rem;
+  font-family: var(--font-retro);
+  transition: all 0.2s ease;
+}
+
+.notification-banner-close:hover {
+  border-color: var(--red);
+  color: var(--red);
+  box-shadow: 0 0 10px var(--red);
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes bannerPulse {
+
+  0%,
+  100% {
+    box-shadow:
+      0 0 20px rgba(255, 0, 255, 0.4),
+      0 4px 20px rgba(0, 0, 0, 0.5);
+  }
+
+  50% {
+    box-shadow:
+      0 0 40px rgba(255, 0, 255, 0.7),
+      0 4px 30px rgba(0, 0, 0, 0.6);
+  }
 }
